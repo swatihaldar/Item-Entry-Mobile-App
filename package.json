@@ -1,0 +1,18 @@
+{
+  "name": "erp_mobile",
+  "version": "1.0.0",
+  "description": "Mobile App to add items",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd frontend && yarn install",
+    "dev": "cd frontend && yarn dev",
+    "build": "cd frontend && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lucide-vue-next": "^0.474.0"
+  }
+}

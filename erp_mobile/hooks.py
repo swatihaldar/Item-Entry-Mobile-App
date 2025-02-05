@@ -8,6 +8,22 @@ app_license = "mit"
 # Apps
 # ------------------
 
+
+# whitelisted_methods = {
+#     "erp_mobile.api.get_items": "erp_mobile.api.get_items",
+#     "erp_mobile.api.add_item": "erp_mobile.api.add_item"
+# }
+
+
+
+whitelisted_methods = {
+    "erp_mobile.api.get_items": "erp_mobile.api.get_items",
+    "erp_mobile.api.add_item": "erp_mobile.api.add_item",
+    "erp_mobile.api.login": "erp_mobile.api.login",
+    "erp_mobile.api.logout": "erp_mobile.api.logout",
+    "erp_mobile.api.get_user_profile": "erp_mobile.api.get_user_profile"
+}
+
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
@@ -245,3 +261,5 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+website_route_rules = [{'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'},]
