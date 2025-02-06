@@ -92,3 +92,19 @@ def add_item(item_code, item_name, item_group, stock_uom):
         frappe.db.rollback()
         return {"success": False, "message": str(e)}
 
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def get_current_user_info():
+    current_user = frappe.session.user
+    user = frappe.db.get_value(
+        "User", current_user, ["name", "first_name", "last_name", "full_name", "user_image", "email", "username", "language", "time_zone"], as_dict=True
+    )
+    user["roles"] = frappe.get_roles(current_user)
+    return user

@@ -1,45 +1,93 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-center mb-8">Welcome to ERPNext Mobile</h1>
-    
-    <div class="grid grid-cols-2 gap-4">
-      <router-link to="/items" class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-6 flex flex-col items-center justify-center">
-        <BoxIcon class="w-12 h-12 mb-2" />
-        <span class="text-lg font-semibold">Items</span>
-      </router-link>
-      
-      <router-link to="/profile" class="bg-green-500 hover:bg-green-600 text-white rounded-lg p-6 flex flex-col items-center justify-center">
-        <UserIcon class="w-12 h-12 mb-2" />
-        <span class="text-lg font-semibold">Profile</span>
-      </router-link>
+    <!-- Simple Header Section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">Hello, {{ userInfo?.full_name || 'User' }}!</h1>
+      <p class="text-xl">Welcome to ERP Mobile</p>
     </div>
 
-    <div class="mt-8">
-      <h2 class="text-2xl font-semibold mb-4">Recent Activities</h2>
-      <ul class="bg-white rounded-lg shadow divide-y">
-        <li v-for="(activity, index) in recentActivities" :key="index" class="p-4">
-          <div class="flex items-center">
-            <component :is="activity.icon" class="w-6 h-6 mr-3 text-gray-500" />
-            <div>
-              <p class="font-medium">{{ activity.text }}</p>
-              <p class="text-sm text-gray-500">{{ activity.timestamp }}</p>
-            </div>
-          </div>
-        </li>
-      </ul>
+    <!-- Quick Links Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Quick Links</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <router-link
+          v-for="link in filteredLinks"
+          :key="link.to"
+          :to="link.to"
+          class="flex items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <component :is="link.icon" class="w-6 h-6 mr-2" />
+          <span class="text-gray-800">{{ link.label }}</span>
+        </router-link>
+      </div>
+    </div>
+
+    <!-- Item Statistics Bar Chart -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-semibold mb-4">Item Statistics</h2>
+      <Barchart />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { BoxIcon, UserIcon, PlusIcon, EditIcon, TrashIcon } from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { UserIcon, PackageIcon } from 'lucide-vue-next'
+import { createResource } from 'frappe-ui'
+import Barchart from '../components/Barchart.vue'
 
-const recentActivities = ref([
-  { icon: PlusIcon, text: 'New item added: Iphone', timestamp: '2 hours ago' },
-  { icon: EditIcon, text: 'Updated item: Realme', timestamp: '5 hours ago' },
-  { icon: TrashIcon, text: 'Deleted item: ', timestamp: '1 day ago' },
-  { icon: UserIcon, text: 'Profile updated', timestamp: '2 days ago' },
-])
+// Reactive variable to store user information
+const userInfo = ref(null)
+
+// Quick Links data (removed Reports and Settings links)
+const quickLinks = [
+  { to: '/items', icon: PackageIcon, label: 'Items' },
+  { to: '/profile', icon: UserIcon, label: 'Profile' },
+]
+
+// Computed property to filter links (if you need additional filtering logic)
+const filteredLinks = computed(() => {
+  return quickLinks
+})
+
+// Fetch user information
+const fetchUserInfo = createResource({
+  url: 'erp_mobile.api.get_current_user_info',
+  auto: true,
+  onSuccess(data) {
+    userInfo.value = data
+  },
+  onError(error) {
+    console.error('Error fetching user info:', error)
+  }
+})
+
+// Trigger data fetch when component is mounted
+onMounted(() => {
+  fetchUserInfo.submit()
+})
 </script>
 
+<style>
+/* Update text color for better visibility against the background */
+.router-link-active {
+  color: #4CAF50; /* Adjust color as needed */
+}
+
+.router-link-exact-active {
+  color: #2231ff; /* Adjust color for active state */
+}
+
+.router-link {
+  text-decoration: none;
+}
+
+/* Hover effect on quick links */
+router-link {
+  color: #4A5568; /* Dark text color for better visibility */
+}
+
+router-link:hover {
+  color: #2D3748; /* Darker on hover for good contrast */
+}
+</style>

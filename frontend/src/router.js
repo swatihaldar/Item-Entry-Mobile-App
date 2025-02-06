@@ -23,10 +23,15 @@ const routes = [
     name: 'Profile',
     component: () => import('@/components/Profile.vue')
   },
+  {
+    path: '/item/:id',
+    name: 'ItemDetails',
+    component: () => import('@/components/ItemDetails.vue')
+  },
 ]
 
 let router = createRouter({
-  history: createWebHistory('/frontend'),
+  history: createWebHistory('/erp_mobile'),
   routes,
 })
 

@@ -1,5 +1,7 @@
 <template>
   <div id="app" class="min-h-screen bg-gray-100 flex flex-col">
+    <!-- Pass user data as a prop to Navbar -->
+    <Navbar :user="user.data" />
     <main class="flex-grow overflow-y-auto pb-16">
       <router-view></router-view>
     </main>
@@ -25,7 +27,17 @@
 </template>
 
 <script setup>
-import { HomeIcon, BoxIcon, UserIcon } from 'lucide-vue-next'
+import { HomeIcon, BoxIcon, UserIcon } from 'lucide-vue-next';
+import Navbar from './components/Navbar.vue';
+import { createResource } from "frappe-ui";
+
+const user = createResource({
+  url: "erp_mobile.api.get_current_user_info",
+  auto: true,
+  onError() {
+    window.location.href = "/login?redirect-to=%2Fhr%2Froster";
+  },
+});
 </script>
 
 <style>
@@ -41,8 +53,7 @@ body {
 }
 
 main {
-  height: calc(100vh - 64px); 
+  height: calc(100vh - 112px);
   overflow-y: auto;
 }
 </style>
-

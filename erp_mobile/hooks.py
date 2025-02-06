@@ -21,7 +21,8 @@ whitelisted_methods = {
     "erp_mobile.api.add_item": "erp_mobile.api.add_item",
     "erp_mobile.api.login": "erp_mobile.api.login",
     "erp_mobile.api.logout": "erp_mobile.api.logout",
-    "erp_mobile.api.get_user_profile": "erp_mobile.api.get_user_profile"
+    "erp_mobile.api.get_user_profile": "erp_mobile.api.get_user_profile",
+    # "erp_mobile.api.get_current_user_info": "erp_mobile.api.get_current_user_info"
 }
 
 # required_apps = []
