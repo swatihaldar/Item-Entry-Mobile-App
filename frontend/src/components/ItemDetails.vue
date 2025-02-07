@@ -1,55 +1,56 @@
 <template>
-    <div class="container mx-auto px-4 py-8">
-      <div v-if="item" class="bg-white rounded-lg shadow-lg overflow-hidden max-w-6xl mx-auto">
-        <!-- Header with back button -->
-        <div class="relative">
+    <div class="bg-gray-100 min-h-screen">
+      <div class="max-w-7xl mx-auto p-4">
+        <div v-if="item" class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <!-- Header with back button and edit/delete options -->
+          <div class="relative bg-indigo-600 text-white p-4">
+            <button 
+              @click="$router.back()" 
+              class="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg z-10"
+            >
+              <ChevronLeftIcon class="h-6 w-6 text-gray-600" />
+            </button>
+            <h1 class="text-2xl font-bold text-center">{{ item.item_name }}</h1>
+            <div class="absolute top-4 right-4 flex space-x-2">
+              <button 
+                @click="isEditMode = true" 
+                class="bg-green-500 text-white rounded-full p-2 hover:bg-green-600 transition-colors"
+              >
+                <EditIcon class="h-5 w-5" />
+              </button>
+              <button 
+                @click="confirmDelete" 
+                class="bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
+              >
+                <TrashIcon class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+  
           <div class="md:flex">
             <!-- Image Section -->
-            <div class="md:w-1/2 relative">
-              <button 
-                @click="$router.back()" 
-                class="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg z-10"
-              >
-                <ChevronLeftIcon class="h-6 w-6 text-gray-600" />
-              </button>
+            <div class="md:w-1/2 relative aspect-w-16 aspect-h-9 md:aspect-none md:h-[600px]">
               <img 
-                :src="item.image || '/placeholder.svg?height=400&width=400'" 
+                :src="item.image || '/placeholder.svg?height=600&width=600'" 
                 :alt="item.item_name"
-                class="w-full h-64 md:h-[500px] object-cover"
+                class="w-full h-full object-cover"
               />
             </div>
   
-            <!-- Details Section -->
-            <div class="md:w-1/2 p-6">
-              <div class="flex justify-between items-start">
+            <!-- Item Details -->
+            <div class="md:w-1/2 p-6 space-y-6">
+              <div v-if="!isEditMode">
                 <div>
-                  <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ item.item_name }}</h1>
-                  <p class="text-gray-500">Code: {{ item.item_code }}</p>
+                  <h2 class="text-2xl font-semibold mb-2">{{ item.item_name }}</h2>
+                  <p class="text-gray-600">Code: {{ item.item_code }}</p>
                 </div>
-                <div class="flex space-x-2">
-                  <button 
-                    @click="isEditMode = true" 
-                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
-                  >
-                    <EditIcon class="h-5 w-5" />
-                  </button>
-                  <button 
-                    @click="confirmDelete" 
-                    class="p-2 text-red-600 hover:bg-red-50 rounded-full"
-                  >
-                    <TrashIcon class="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
   
-              <!-- Item Details -->
-              <div v-if="!isEditMode" class="mt-6 space-y-6">
-                <div>
-                  <h2 class="text-lg font-semibold mb-2">Description</h2>
+                <div class="mt-4">
+                  <h3 class="text-lg font-semibold mb-2">Description</h3>
                   <p class="text-gray-600">{{ item.description || 'No description available.' }}</p>
                 </div>
   
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4 mt-6">
                   <div class="bg-gray-50 p-4 rounded-lg">
                     <p class="text-sm text-gray-500">Item Group</p>
                     <p class="font-medium">{{ item.item_group }}</p>
@@ -58,99 +59,121 @@
                     <p class="text-sm text-gray-500">UOM</p>
                     <p class="font-medium">{{ item.stock_uom }}</p>
                   </div>
+                  <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-500">Created By</p>
+                    <p class="font-medium">{{ item.owner }}</p>
+                  </div>
+                  <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-500">Last Modified</p>
+                    <p class="font-medium">{{ formatDate(item.modified) }}</p>
+                  </div>
                 </div>
   
-                <div class="space-y-2">
-                  <p class="text-gray-600">Created: {{ formatDate(item.creation) }}</p>
-                  <p class="text-gray-600">Last Modified: {{ formatDate(item.modified) }}</p>
-                  <p class="text-gray-600">Created By: {{ item.owner }}</p>
+                <div class="mt-6 text-sm text-gray-500">
+                  <p>Created: {{ formatDate(item.creation) }}</p>
                 </div>
               </div>
   
               <!-- Edit Form -->
-              <div v-else class="mt-6">
-                <form @submit.prevent="saveChanges" class="space-y-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Item Name</label>
+              <form v-else @submit.prevent="saveChanges" class="space-y-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Item Name</label>
+                  <input 
+                    v-model="editedItem.item_name" 
+                    type="text" 
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+  
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea 
+                    v-model="editedItem.description" 
+                    rows="3"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  ></textarea>
+                </div>
+  
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Item Group</label>
+                  <select 
+                    v-model="editedItem.item_group"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option v-for="group in itemGroups" :key="group.name" :value="group.name">
+                      {{ group.item_group_name }}
+                    </option>
+                  </select>
+                </div>
+  
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">UOM</label>
+                  <select 
+                    v-model="editedItem.stock_uom"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="Nos">Nos</option>
+                    <option v-for="uom in uoms" :key="uom.name" :value="uom.name">
+                      {{ uom.uom_name }}
+                    </option>
+                  </select>
+                </div>
+  
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Image</label>
+                  <div class="mt-1 flex items-center space-x-4">
                     <input 
-                      v-model="editedItem.item_name" 
-                      type="text" 
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      type="file" 
+                      accept="image/*" 
+                      @change="handleImageUpload" 
+                      class="hidden" 
+                      ref="fileInput"
                     />
-                  </div>
-  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea 
-                      v-model="editedItem.description" 
-                      rows="3"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    ></textarea>
-                  </div>
-  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Item Group</label>
-                    <select 
-                      v-model="editedItem.item_group"
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    >
-                      <option v-for="group in itemGroups" :key="group.name" :value="group.name">
-                        {{ group.item_group_name }}
-                      </option>
-                    </select>
-                  </div>
-  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">UOM</label>
-                    <select 
-                      v-model="editedItem.stock_uom"
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    >
-                      <option value="Nos">Nos</option>
-                      <option v-for="uom in uoms" :key="uom.name" :value="uom.name">
-                        {{ uom.uom_name }}
-                      </option>
-                    </select>
-                  </div>
-  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Image URL</label>
-                    <input 
-                      v-model="editedItem.image" 
-                      type="text"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                  </div>
-  
-                  <div class="flex justify-end space-x-2">
                     <button 
-                      type="button"
-                      @click="cancelEdit"
-                      class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      type="button" 
+                      @click="$refs.fileInput.click()" 
+                      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
                     >
-                      Cancel
+                      Choose File
                     </button>
-                    <button 
-                      type="submit"
-                      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-indigo-700"
-                      :disabled="updateItem.loading"
-                    > 
-                      {{ updateItem.loading ? 'Saving...' : 'Save Changes' }} 
-                    </button>
+                    <span v-if="imageFile">{{ imageFile.name }}</span>
                   </div>
-                </form>
-              </div>
+                  <p class="mt-2 text-sm text-gray-500">Or enter image URL:</p>
+                  <input 
+                    v-model="editedItem.image" 
+                    type="text"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+  
+                <div class="flex justify-end space-x-2">
+                  <button 
+                    type="button"
+                    @click="cancelEdit"
+                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-indigo-700"
+                    :disabled="updateItem.loading"
+                  >
+                    {{ updateItem.loading ? 'Saving...' : 'Save Changes' }}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      </div>
   
-      <!-- Loading State -->
-      <div v-else class="flex justify-center items-center h-64">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <!-- Loading State -->
+        <div v-else class="flex justify-center items-center h-64">
+          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+        </div>
       </div>
     </div>
   </template>
@@ -168,6 +191,7 @@
   const editedItem = ref({})
   const itemGroups = ref([])
   const uoms = ref([])
+  const imageFile = ref(null)
   
   const fetchItem = createResource({
     url: 'frappe.client.get',
@@ -221,7 +245,43 @@
     })
   }
   
-  function saveChanges() {
+  function handleImageUpload(event) {
+    const file = event.target.files[0]
+    if (file) {
+      imageFile.value = file
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        editedItem.value.image = e.target.result
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+  
+  async function saveChanges() {
+    let imageUrl = editedItem.value.image
+  
+    if (imageFile.value) {
+      // Upload the image file and get the URL
+      const formData = new FormData()
+      formData.append('file', imageFile.value)
+      formData.append('doctype', 'Item')
+      formData.append('docname', item.value.name)
+      formData.append('fieldname', 'image')
+  
+      try {
+        const response = await fetch('/api/method/upload_file', {
+          method: 'POST',
+          body: formData,
+        })
+        const result = await response.json()
+        if (result.message && result.message.file_url) {
+          imageUrl = result.message.file_url
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error)
+      }
+    }
+  
     updateItem.submit({
       doctype: 'Item',
       name: item.value.name,
@@ -230,7 +290,7 @@
         description: editedItem.value.description,
         item_group: editedItem.value.item_group,
         stock_uom: editedItem.value.stock_uom,
-        image: editedItem.value.image
+        image: imageUrl
       }
     })
   }
@@ -238,6 +298,7 @@
   function cancelEdit() {
     isEditMode.value = false
     editedItem.value = { ...item.value }
+    imageFile.value = null
   }
   
   function confirmDelete() {

@@ -36,21 +36,21 @@ import { UserIcon, PackageIcon } from 'lucide-vue-next'
 import { createResource } from 'frappe-ui'
 import Barchart from '../components/Barchart.vue'
 
-// Reactive variable to store user information
+
 const userInfo = ref(null)
 
-// Quick Links data (removed Reports and Settings links)
+
 const quickLinks = [
   { to: '/items', icon: PackageIcon, label: 'Items' },
   { to: '/profile', icon: UserIcon, label: 'Profile' },
 ]
 
-// Computed property to filter links (if you need additional filtering logic)
+
 const filteredLinks = computed(() => {
   return quickLinks
 })
 
-// Fetch user information
+
 const fetchUserInfo = createResource({
   url: 'erp_mobile.api.get_current_user_info',
   auto: true,
@@ -62,32 +62,31 @@ const fetchUserInfo = createResource({
   }
 })
 
-// Trigger data fetch when component is mounted
+
 onMounted(() => {
   fetchUserInfo.submit()
 })
 </script>
 
 <style>
-/* Update text color for better visibility against the background */
+
 .router-link-active {
-  color: #4CAF50; /* Adjust color as needed */
+  color: #4CAF50; 
 }
 
 .router-link-exact-active {
-  color: #2231ff; /* Adjust color for active state */
+  color: #2231ff; 
 }
 
 .router-link {
   text-decoration: none;
 }
 
-/* Hover effect on quick links */
 router-link {
-  color: #4A5568; /* Dark text color for better visibility */
+  color: #4A5568; 
 }
 
 router-link:hover {
-  color: #2D3748; /* Darker on hover for good contrast */
+  color: #2D3748; 
 }
 </style>
