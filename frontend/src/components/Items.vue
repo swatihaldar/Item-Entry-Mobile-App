@@ -32,21 +32,21 @@
         class="block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
       >
         <div class="flex items-center p-4">
-          <div class="w-16 h-16 flex-shrink-0">
+          <div v-if="item.image" class="w-16 h-16 flex-shrink-0">
             <img
-              :src="item.image || '/placeholder.svg?height=100&width=100'"
+              :src="item.image"
               :alt="item.item_name"
               class="w-full h-full object-cover rounded-lg"
             />
           </div>
           <div class="ml-4 flex-grow">
             <h2 class="text-lg font-semibold text-gray-900">{{ item.item_name }}</h2>
-            <p class="text-sm text-gray-500">Code: {{ item.item_code || 'N/A' }}</p>
+            <p class="text-sm text-gray-500">Code: {{ item.item_code }}</p>
             <p class="text-sm text-gray-500">Group: {{ item.item_group }}</p>
           </div>
           <div class="flex items-center space-x-2">
             <button
-              @click.stop="deleteItem(item.name)"
+              @click.stop="confirmDelete(item.name)"
               class="p-2 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
             >
               <TrashIcon class="w-5 h-5" />
@@ -61,11 +61,11 @@
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="md:flex">
           <!-- Image Section -->
-          <div class="md:w-1/2 relative aspect-w-16 aspect-h-9 md:aspect-none md:h-[400px]">
+          <div v-if="selectedItem.image" class="md:w-1/2 relative md:h-[400px]">
             <img 
-              :src="selectedItem.image || '/placeholder.svg?height=400&width=400'" 
+              :src="selectedItem.image" 
               :alt="selectedItem.item_name"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-contain"
             />
           </div>
 
@@ -107,7 +107,7 @@
 
               <div class="mt-6 flex justify-end space-x-2">
                 <button 
-                  @click="isEditMode = true" 
+                  @click="startEdit" 
                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Edit
@@ -127,6 +127,16 @@
                 <label class="block text-sm font-medium text-gray-700">Item Name</label>
                 <input 
                   v-model="editedItem.item_name" 
+                  type="text" 
+                  required
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Item Code</label>
+                <input 
+                  v-model="editedItem.item_code" 
                   type="text" 
                   required
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -222,15 +232,18 @@
     <div v-if="isAddItemDialogOpen" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
       <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
         <h2 class="text-2xl font-bold mb-4">Add New Item</h2>
+
         <form @submit.prevent="submitItem">
           <div class="mb-4">
             <label for="item_code" class="block text-sm font-medium text-gray-700">Item Code</label>
             <input type="text" id="item_code" v-model="newItem.item_code" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
           </div>
+
           <div class="mb-4">
             <label for="item_name" class="block text-sm font-medium text-gray-700">Item Name</label>
             <input type="text" id="item_name" v-model="newItem.item_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
           </div>
+
           <div class="mb-4">
             <label for="item_group" class="block text-sm font-medium text-gray-700">Item Group</label>
             <select id="item_group" v-model="newItem.item_group" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
@@ -240,6 +253,7 @@
               </option>
             </select>
           </div>
+
           <div class="mb-4">
             <label for="stock_uom" class="block text-sm font-medium text-gray-700">UOM</label>
             <select id="stock_uom" v-model="newItem.stock_uom" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
@@ -249,15 +263,18 @@
               </option>
             </select>
           </div>
+
           <div class="mb-4">
             <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
             <textarea id="description" v-model="newItem.description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"></textarea>
           </div>
+
           <div class="mb-4">
             <label for="image" class="block text-sm font-medium text-gray-700">Image</label>
             <input type="file" id="image" @change="handleImageUpload" accept="image/*" class="mt-1 block w-full">
             <input type="text" v-model="newItem.image_url" placeholder="Or enter image URL" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
           </div>
+
           <div class="flex justify-end space-x-2 mt-6">
             <button 
               type="button" 
@@ -273,14 +290,16 @@
               Add Item
             </button>
           </div>
+          
         </form>
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 import { PlusIcon, TrashIcon, ChevronLeftIcon } from 'lucide-vue-next'
 
@@ -288,11 +307,12 @@ const items = ref([])
 const selectedItem = ref(null)
 const itemGroups = ref([])
 const uoms = ref([])
-const newItem = ref({ item_code: '', item_name: '', item_group: '', stock_uom: 'Nos', description: '', image: null, image_url: '' })
+const newItem = ref({ item_code: '', item_name: '', item_group: 'All Item Groups', stock_uom: 'Nos', description: '', image: null, image_url: '' })
 const isAddItemDialogOpen = ref(false)
 const isEditMode = ref(false)
 const editedItem = ref({})
 const imageFile = ref(null)
+const addItemError = ref('')
 
 const fetchItems = createResource({
   url: 'frappe.client.get_list',
@@ -333,9 +353,14 @@ const fetchUOMs = createResource({
 const addItem = createResource({
   url: 'frappe.client.insert',
   onSuccess() {
-    newItem.value = { item_code: '', item_name: '', item_group: '', stock_uom: 'Nos', description: '', image: null, image_url: '' }
+    newItem.value = { item_code: '', item_name: '', item_group: 'All Item Groups', stock_uom: 'Nos', description: '', image: null, image_url: '' }
     isAddItemDialogOpen.value = false
     fetchItems.reload()
+    addItemError.value = ''
+  },
+  onError(error) {
+    console.error('Error adding item:', error)
+    addItemError.value = error.message || 'An error occurred while adding the item. Please try again.'
   }
 })
 
@@ -381,11 +406,18 @@ function handleImageUpload(event) {
 }
 
 function submitItem() {
+  addItemError.value = ''
   const itemData = { ...newItem.value }
   if (itemData.image_url) {
     itemData.image = itemData.image_url
   }
   delete itemData.image_url
+
+  // Validate required fields
+  if (!itemData.item_name || !itemData.item_code || !itemData.item_group || !itemData.stock_uom) {
+    addItemError.value = 'Please fill in all required fields.'
+    return
+  }
 
   addItem.submit({
     doc: {
@@ -397,6 +429,11 @@ function submitItem() {
 
 function selectItem(item) {
   selectedItem.value = item
+}
+
+function startEdit() {
+  editedItem.value = { ...selectedItem.value }
+  isEditMode.value = true
 }
 
 function saveChanges() {
@@ -436,6 +473,7 @@ function updateItemWithImage(imageUrl) {
     name: selectedItem.value.name,
     fieldname: {
       item_name: editedItem.value.item_name,
+      item_code: editedItem.value.item_code,
       description: editedItem.value.description,
       item_group: editedItem.value.item_group,
       stock_uom: editedItem.value.stock_uom,
@@ -472,5 +510,24 @@ onMounted(() => {
   fetchItemGroups.reload()
   fetchUOMs.reload()
 })
+
+// Watch for changes in selectedItem and reset edit mode
+watch(selectedItem, () => {
+  isEditMode.value = false
+})
 </script>
 
+<style scoped>
+@media (min-width: 768px) {
+  .md\:h-\[400px\] {
+    height: 400px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+</style>
