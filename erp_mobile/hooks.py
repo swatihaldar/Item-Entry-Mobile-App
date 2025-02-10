@@ -263,4 +263,9 @@ whitelisted_methods = {
 # }
 
 
-website_route_rules = [{'from_route': '/erp_mobile/<path:app_path>', 'to_route': 'erp_mobile'},]
+# website_route_rules = [{'from_route': '/erp_mobile/<path:app_path>', 'to_route': 'erp_mobile'},]
+
+
+website_route_rules = [
+  {"from_route": "/erp_mobile/<path:app_path>", "to_route": "erp_mobile"},
+]
