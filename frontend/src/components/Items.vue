@@ -206,7 +206,7 @@
                 </button>
                 <button 
                   type="submit"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-indigo-700"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   :disabled="updateItem.loading"
                 >
                   {{ updateItem.loading ? 'Saving...' : 'Save Changes' }}
@@ -268,7 +268,7 @@
             </button>
             <button 
               type="submit"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Add Item
             </button>
