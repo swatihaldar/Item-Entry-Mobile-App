@@ -73,6 +73,45 @@
             />
           </div>
 
+          <!-- <div class="mb-4">
+            <label
+              for="gst_hsn_code"
+              class="block text-sm font-medium text-gray-700"
+            >
+              HSN/SAC Code <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="gst_hsn_code"
+              v-model="newItem.gst_hsn_code"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+            >
+              <option value="">Select HSN/SAC Code</option>
+              <option
+                v-for="hsnCode in searchHSNCode.data"
+                :key="hsnCode.name"
+                :value="hsnCode.name"
+              >
+                {{ hsnCode.hns_code }}
+              </option>
+            </select>
+          </div> -->
+
+          <div class="mb-4">
+            <label
+              for="item_name"
+              class="block text-sm font-medium text-gray-700"
+              >Item Name <span class="text-red-500">*</span></label
+            >
+            <input
+              type="text"
+              id="item_name"
+              v-model="newItem.item_name"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+            />
+          </div>
+
           <div class="mb-4">
             <label
               for="gst_hsn_code"
@@ -97,20 +136,7 @@
             </select>
           </div>
 
-          <div class="mb-4">
-            <label
-              for="item_name"
-              class="block text-sm font-medium text-gray-700"
-              >Item Name <span class="text-red-500">*</span></label
-            >
-            <input
-              type="text"
-              id="item_name"
-              v-model="newItem.item_name"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-            />
-          </div>
+
           <div class="mb-4">
             <label
               for="item_group"
@@ -273,11 +299,11 @@ const searchHSNCode = createResource({
   url: 'frappe.client.get_list',
   params: {
     doctype: 'GST HSN Code',
-    fields: ['name', 'hns_code'],
+    fields: ['name', 'hsn_code', 'description'],
   },
   auto: true,
   onSuccess(data) {
-    uoms.value = data
+    hsnCodeSuggestions.value = data
   },
 })
 
@@ -294,7 +320,7 @@ const addItem = createResource({
       description: '',
       image: null,
       image_url: '',
-      gst_hsn_code: '',
+      gst_hsn_code: '000000',
     }
     isAddItemDialogOpen.value = false
     fetchItems.reload()
