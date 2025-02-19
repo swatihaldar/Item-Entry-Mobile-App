@@ -12,12 +12,21 @@
           Add Item
         </button>
       </div>
+      <!-- Search Bar -->
+      <div class="flex items-center">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search by item name"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+        />
+      </div>
     </div>
 
     <!-- Items List -->
     <div class="space-y-4">
       <router-link
-        v-for="item in items"
+        v-for="item in displayedItems"
         :key="item.name"
         :to="`/item/${item.name}`"
         class="block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -36,7 +45,6 @@
             </h2>
             <p class="text-sm text-gray-500">Code: {{ item.item_code }}</p>
             <p class="text-sm text-gray-500">Group: {{ item.item_group }}</p>
-    
           </div>
           <div class="flex items-center space-x-2">
             <button
@@ -48,6 +56,25 @@
           </div>
         </div>
       </router-link>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-6">
+      <button
+        @click="previousPage"
+        :disabled="currentPage === 1"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+      >
+        Previous
+      </button>
+      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+      >
+        Next
+      </button>
     </div>
 
     <!-- Add Item Dialog -->
@@ -73,7 +100,7 @@
             />
           </div>
 
-          <!-- <div class="mb-4">
+          <div class="mb-4">
             <label
               for="gst_hsn_code"
               class="block text-sm font-medium text-gray-700"
@@ -92,10 +119,10 @@
                 :key="hsnCode.name"
                 :value="hsnCode.name"
               >
-                {{ hsnCode.hns_code }}
+                {{ hsnCode.hsn_code }}
               </option>
             </select>
-          </div> -->
+          </div>
 
           <div class="mb-4">
             <label
@@ -111,32 +138,6 @@
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
           </div>
-
-          <div class="mb-4">
-            <label
-              for="gst_hsn_code"
-              class="block text-sm font-medium text-gray-700"
-            >
-              HSN/SAC Code <span class="text-red-500">*</span>
-            </label>
-            <select
-              id="gst_hsn_code"
-              v-model="newItem.gst_hsn_code"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-            >
-              <option value="">Select HSN/SAC Code</option>
-              <option
-                v-for="hsnCode in searchHSNCode.data"
-                :key="hsnCode.name"
-                :value="hsnCode.name"
-              >
-                {{ hsnCode.hns_code }}
-              </option>
-            </select>
-          </div>
-
-
           <div class="mb-4">
             <label
               for="item_group"
@@ -231,7 +232,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { createResource } from 'frappe-ui'
 import { PlusIcon, TrashIcon } from 'lucide-vue-next'
 
@@ -251,19 +252,17 @@ const newItem = ref({
 const isAddItemDialogOpen = ref(false)
 const hsnCodeSuggestions = ref([])
 
+// Pagination
+const itemsPerPage = 20
+const currentPage = ref(1)
+const searchQuery = ref('')
+
 const fetchItems = createResource({
   url: 'frappe.client.get_list',
   params: {
     doctype: 'Item',
-    fields: [
-      'name',
-      'item_code',
-      'item_name',
-      'item_group',
-      'stock_uom',
-      'description',
-      'image',
-    ],
+    fields: ['name', 'item_code', 'item_name', 'item_group', 'image'],
+    limit_page_length: 0, // Fetch all items
   },
   auto: true,
   onSuccess(data) {
@@ -307,8 +306,6 @@ const searchHSNCode = createResource({
   },
 })
 
-
-
 const addItem = createResource({
   url: 'frappe.client.insert',
   onSuccess() {
@@ -316,11 +313,11 @@ const addItem = createResource({
       item_code: '',
       item_name: '',
       item_group: 'All Item Groups',
-      stock_uom: 'Nos',
+      stock_uom: '',
       description: '',
       image: null,
       image_url: '',
-      gst_hsn_code: '000000',
+      gst_hsn_code: '',
     }
     isAddItemDialogOpen.value = false
     fetchItems.reload()
@@ -333,6 +330,40 @@ const deleteItemResource = createResource({
     fetchItems.reload()
   },
 })
+
+// Computed Properties
+const filteredItems = computed(() => {
+  if (!searchQuery.value) {
+    return items.value
+  }
+  const lowerSearchQuery = searchQuery.value.toLowerCase()
+  return items.value.filter((item) =>
+    item.item_name.toLowerCase().includes(lowerSearchQuery)
+  )
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredItems.value.length / itemsPerPage)
+})
+
+const displayedItems = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  return filteredItems.value.slice(startIndex, endIndex)
+})
+
+// Pagination Methods
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+function previousPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
 
 function openAddItemDialog() {
   isAddItemDialogOpen.value = true

@@ -15,6 +15,16 @@ app_license = "mit"
 # }
 
 
+add_to_apps_screen = [
+    {
+        "name": "erp_mobile",
+        "logo": "/assets/erp_mobile/manifest/—Pngtree—vector apps icon_4276353.png",
+        "title": "ERP Mobile",
+        "route": "/erp_mobile", 
+    }
+]
+
+
 
 whitelisted_methods = {
     "erp_mobile.api.get_items": "erp_mobile.api.get_items",
@@ -24,6 +34,7 @@ whitelisted_methods = {
     "erp_mobile.api.get_user_profile": "erp_mobile.api.get_user_profile",
     # "erp_mobile.api.get_current_user_info": "erp_mobile.api.get_current_user_info"
 }
+
 
 # required_apps = []
 
@@ -269,3 +280,5 @@ whitelisted_methods = {
 website_route_rules = [
   {"from_route": "/erp_mobile/<path:app_path>", "to_route": "erp_mobile"},
 ]
+
+

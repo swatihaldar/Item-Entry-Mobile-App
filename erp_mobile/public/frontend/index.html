@@ -2,19 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/assets/erp_mobile/frontend/favicon.png" />
+    <link rel="icon" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Frappe UI App</title>
-    <script type="module" crossorigin src="/assets/erp_mobile/frontend/assets/index-wG4MnxLv.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/erp_mobile/frontend/assets/index-ClYsLjqy.css">
+    <link rel="manifest" href="/assets/erp_mobile/frontend/manifest.webmanifest" />
+    <script type="module" crossorigin src="/assets/erp_mobile/frontend/assets/index-Vv3bt0ip.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/erp_mobile/frontend/assets/index-ALeqX6Zu.css">
   </head>
   <body>
     <div id="app"></div>
     <div id="modals"></div>
     <div id="popovers"></div>
+    <button id="install-button" style="display: none;">Install App</button>
 
     <script>
       window.csrf_token = '{{ frappe.session.csrf_token }}'
     </script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
+
+

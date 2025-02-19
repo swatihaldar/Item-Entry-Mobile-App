@@ -4,6 +4,7 @@
 
     <div v-if="userInfo" class="bg-white shadow-md rounded-lg p-6 text-center">
   
+      <!-- User Avatar -->
       <div class="flex justify-center mb-6">
         <img
           :src="userInfo.user_image || defaultImage"
@@ -47,14 +48,14 @@ import { session } from "../data/session";
 import { LogOutIcon } from 'lucide-vue-next'
 
 const defaultImage = "https://cdn-icons-png.flaticon.com/512/1053/1053244.png";
-
 const userInfo = ref(null);
 
+// Image error handler
 function onImageError(event) {
   event.target.src = defaultImage;
 }
 
-// Fetch user info from the API
+// Fetch user info from API
 async function fetchUserInfo() {
   try {
     const response = await axios.get("/api/method/erp_mobile.api.get_current_user_info");
@@ -64,6 +65,7 @@ async function fetchUserInfo() {
   }
 }
 
+// Handle logout
 function logout() {
   session.logout.submit(); 
   console.log("User logged out");
