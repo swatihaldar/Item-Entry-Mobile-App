@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-4 py-8 mt-15">
     <h1 class="text-3xl font-bold text-center mb-8">User Profile</h1>
 
     <div v-if="userInfo" class="bg-white shadow-md rounded-lg p-6 text-center">

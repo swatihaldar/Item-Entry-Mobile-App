@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border-b px-6 py-3 flex items-center justify-between shadow-md">
+  <div class="bg-white border-b px-6 py-3 flex items-center justify-between shadow-md fixed top-0 w-full z-50">
 
     <div class="flex items-center space-x-4">
       <router-link to="/" class="text-gray-800 hover:text-blue-600 font-semibold text-lg flex items-center">
@@ -26,7 +26,7 @@
           :label="user?.full_name"
           :image="user?.user_image"
           size="lg"
-          class="cursor-pointer border-2 border-gray-200 p-1"
+          class="cursor-pointer  p-1 w-9 h-9"
         />
       </Dropdown>
     </div>

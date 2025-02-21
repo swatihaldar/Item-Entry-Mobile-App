@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4 py-8 pb-20">
+  <div class="container mx-auto px-4 py-8 pb-20 mt-15">
     <!-- Header with filters -->
     <div class="flex flex-col space-y-4 mb-6">
       <div class="flex justify-between items-center">
@@ -119,7 +119,7 @@
                 :key="hsnCode.name"
                 :value="hsnCode.name"
               >
-                {{ hsnCode.hsn_code }}
+                {{ hsnCode.hns_code }}
               </option>
             </select>
           </div>
@@ -192,10 +192,11 @@
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             ></textarea>
           </div>
+
           <div class="mb-4">
-            <label for="image" class="block text-sm font-medium text-gray-700"
-              >Image</label
-            >
+            <label for="image" class="block text-sm font-medium text-gray-700">
+              Image
+            </label>
             <input
               type="file"
               id="image"
@@ -209,7 +210,16 @@
               placeholder="Or enter image URL"
               class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
+
+            <!-- Preview Uploaded Image -->
+            <!-- <img
+      v-if="newItem.image_preview"
+      :src="newItem.image_preview"
+      alt="Uploaded Image"
+      class="mt-2 w-32 h-32 object-cover rounded-md border"
+    /> -->
           </div>
+
           <div class="flex justify-end space-x-2 mt-6">
             <button
               type="button"
@@ -247,6 +257,7 @@ const newItem = ref({
   description: '',
   image: null,
   image_url: '',
+  image_preview: null,
   gst_hsn_code: '',
 })
 const isAddItemDialogOpen = ref(false)
@@ -262,7 +273,7 @@ const fetchItems = createResource({
   params: {
     doctype: 'Item',
     fields: ['name', 'item_code', 'item_name', 'item_group', 'image'],
-    limit_page_length: 0, // Fetch all items
+    limit_page_length: 0,
   },
   auto: true,
   onSuccess(data) {
@@ -294,15 +305,27 @@ const fetchUOMs = createResource({
   },
 })
 
+// const searchHSNCode = createResource({
+//   url: 'frappe.client.get_list',
+//   params: {
+//     doctype: 'GST HSN Code',
+//     fields: ['name', 'hsn_code'],
+//   },
+//   auto: true,
+//   onSuccess(data) {
+//     hsnCodeSuggestions.value = data
+//   },
+// })
+
 const searchHSNCode = createResource({
   url: 'frappe.client.get_list',
   params: {
     doctype: 'GST HSN Code',
-    fields: ['name', 'hsn_code', 'description'],
+    fields: ['name', 'hns_code'],
   },
   auto: true,
   onSuccess(data) {
-    hsnCodeSuggestions.value = data
+    uoms.value = data
   },
 })
 
@@ -373,16 +396,6 @@ function closeAddItemDialog() {
   isAddItemDialogOpen.value = false
 }
 
-function handleImageUpload(event) {
-  const file = event.target.files[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      newItem.value.image = e.target.result
-    }
-    reader.readAsDataURL(file)
-  }
-}
 
 function onsearchHSNCode() {
   if (newItem.value.gst_hsn_code.length > 2) {
@@ -399,6 +412,35 @@ function selectHSNCode(suggestion) {
   hsnCodeSuggestions.value = []
 }
 
+
+function handleImageUpload(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // Create a preview of the image
+  newItem.value.image_preview = URL.createObjectURL(file)
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('doctype', 'Item')
+  formData.append('docname', 'new-item') 
+  formData.append('fieldname', 'image')
+  formData.append('is_private', 0)
+
+  fetch('/api/method/upload_file', {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message && data.message.file_url) {
+        newItem.value.image_url = data.message.file_url
+      }
+    })
+    .catch((error) => console.error('File upload error:', error))
+}
+
 function submitItem() {
   const itemData = { ...newItem.value }
 
@@ -407,6 +449,7 @@ function submitItem() {
   }
 
   delete itemData.image_url
+  delete itemData.image_preview 
 
   addItem.submit({
     doc: {

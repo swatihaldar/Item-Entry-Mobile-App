@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 min-h-screen">
+  <div class="bg-gray-100 min-h-screen mt-15">
     <div class="max-w-7xl mx-auto p-4">
       <div v-if="item" class="bg-white rounded-lg shadow-lg overflow-hidden">
 

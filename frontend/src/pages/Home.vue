@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50 min-h-screen">
+  <div class="bg-gray-50 min-h-screen mt-16">
     <!-- Hero Section with Image -->
     <div class="relative h-48 md:h-72 lg:h-96 mb-6">
       <img 
